@@ -1,27 +1,56 @@
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
+// src/App.tsx
+import React, { useEffect, useState } from "react";
+import { fetchB3Stocks } from "../lib/b3stocks";
+import { fetchQuotes } from "../lib/fetchers";
 
-const queryClient = new QueryClient();
+export default function App() {
+  const [stocks, setStocks] = useState([]);    // Universo de ações da B3
+  const [quotes, setQuotes] = useState([]);    // Cotações em tempo real
+  const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
 
-export default App;
+    async function updateData() {
+      setLoading(true);
+
+      // Busca os tickers atualizados (limpa os mortos automaticamente)
+      const stocksList = await fetchB3Stocks();
+      setStocks(stocksList);
+
+      // Busca as cotações em tempo real para os tickers válidos
+      const symbols = stocksList.map(stock => stock.symbol);
+      const quotesList = await fetchQuotes(symbols);
+      setQuotes(quotesList);
+
+      setLoading(false);
+      setLastUpdate(new Date());
+    }
+
+    // Busca inicial
+    updateData();
+
+    // Atualiza a cada 1 minuto
+    interval = setInterval(updateData, 60 * 1000);
+
+    // Limpa o timer ao desmontar o componente
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div>
+      <header>
+        {/* Seu header padrão */}
+        <span>
+          Última atualização: {lastUpdate ? lastUpdate.toLocaleTimeString("pt-BR") : "Carregando..."}
+        </span>
+      </header>
+      <main>
+        {/* Passe os dados para seus componentes/tabelas */}
+        {loading && <div>Atualizando dados...</div>}
+        {/* Exemplo: <ScannerTable stocks={stocks} quotes={quotes} /> */}
+      </main>
+    </div>
+  );
+}
