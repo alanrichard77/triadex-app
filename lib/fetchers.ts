@@ -10,9 +10,8 @@ export interface QuoteInfo {
   time: string;
 }
 
+// Usa BRAPI.dev para buscar cotações/volume em tempo real
 export async function fetchQuotes(symbols: string[]): Promise<QuoteInfo[]> {
-  // Exemplo usando Yahoo Finance API (gratuita no rapidapi)
-  // Atenção ao limite de requisições diárias
   const results: QuoteInfo[] = [];
   for (const symbol of symbols) {
     try {
