@@ -1,0 +1,13 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="tr_grad" x1="0" y1="64" x2="64" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#232b3b"/>
+      <stop offset="0.5" stop-color="#1d2b32"/>
+      <stop offset="1" stop-color="#00D395"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="url(#tr_grad)"/>
+  <polygon points="32,12 52,52 12,52" fill="none" stroke="#00D395" stroke-width="4"/>
+  <rect x="28" y="28" width="8" height="16" rx="2" fill="#00D395" opacity="0.88"/>
+  <rect x="24" y="28" width="16" height="4" rx="2" fill="#00D395" opacity="0.88"/>
+</svg>
