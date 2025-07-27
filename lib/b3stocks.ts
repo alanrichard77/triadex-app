@@ -9,24 +9,27 @@ export interface StockInfo {
 }
 
 export async function fetchB3Stocks(): Promise<StockInfo[]> {
-  // Exemplo usando CSV público da B3 com ativos negociados
-  // (você pode trocar para scraping se preferir fonte HTML)
-  const url = "https://sistemaswebb3-listados.b3.com.br/listedCompaniesPage/main/negociacoes.csv";
+  // Fonte de tickers B3 (StatusInvest scrape simples ou CSV oficial)
+  // Exemplo usando o StatusInvest para garantir tickers válidos
+  const url = "https://statusinvest.com.br/acoes/buscaavancada";
   try {
-    const { data } = await axios.get(url);
-    const rows = data.split('\n').slice(1); // remove header
-    const stocks = rows
-      .map((line: string) => {
-        const [symbol, name, type] = line.split(';');
-        return {
-          symbol: symbol?.trim(),
-          name: name?.trim(),
-          type: type?.trim(),
-          volume: 0 // Placeholder, será preenchido depois
-        };
-      })
-      .filter(stock => stock.symbol && stock.symbol.endsWith('3') || stock.symbol.endsWith('4'));
-    return stocks;
+    const { data } = await axios.post(url, {
+      segmentos: [],
+      setores: [],
+      subsetores: [],
+      onlyativos: true
+    }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
+    // O StatusInvest retorna lista já filtrada
+    return data.map((item: any) => ({
+      symbol: item.ticker,
+      name: item.nome,
+      type: item.tipo,
+      volume: 0 // Preenche depois ao juntar com cotação
+    }));
   } catch (err) {
     console.error("Erro ao buscar tickers B3:", err);
     return [];
