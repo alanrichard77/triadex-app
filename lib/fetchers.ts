@@ -10,7 +10,8 @@ export interface QuoteInfo {
 
 export async function fetchQuotes(symbols: string[]): Promise<QuoteInfo[]> {
   if (!symbols.length) return [];
-  const batch = symbols.slice(0, 100).join(","); // Limite de 100 por chamada
+  // Limita para não estourar a API, pode paginar depois se quiser mais de 100
+  const batch = symbols.slice(0, 100).join(",");
 
   try {
     const url = `https://brapi.dev/api/quote/${batch}?range=1d&fundamental=true`;
