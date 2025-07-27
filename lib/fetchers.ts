@@ -1,6 +1,4 @@
-// lib/fetchers.ts
 import axios from "axios";
-import { StockInfo } from "./b3stocks";
 
 export interface QuoteInfo {
   symbol: string;
@@ -10,23 +8,22 @@ export interface QuoteInfo {
   time: string;
 }
 
-// Usa BRAPI.dev para buscar cotações/volume em tempo real
 export async function fetchQuotes(symbols: string[]): Promise<QuoteInfo[]> {
-  const results: QuoteInfo[] = [];
-  for (const symbol of symbols) {
-    try {
-      const response = await axios.get(`https://brapi.dev/api/quote/${symbol}`);
-      const quote = response.data.results[0];
-      results.push({
-        symbol: quote.symbol,
-        price: quote.regularMarketPrice,
-        volume: quote.regularMarketVolume,
-        currency: quote.currency,
-        time: quote.regularMarketTime
-      });
-    } catch (err) {
-      console.error(`Erro ao buscar cotação de ${symbol}`, err);
-    }
+  if (!symbols.length) return [];
+  const batch = symbols.slice(0, 100).join(","); // Limite de 100 por chamada
+
+  try {
+    const url = `https://brapi.dev/api/quote/${batch}?range=1d&fundamental=true`;
+    const { data } = await axios.get(url);
+    return (data.results || []).map((q: any) => ({
+      symbol: q.symbol,
+      price: q.regularMarketPrice,
+      volume: q.regularMarketVolume,
+      currency: q.currency,
+      time: q.regularMarketTime
+    }));
+  } catch (err) {
+    console.error("Erro ao buscar cotações:", err);
+    return [];
   }
-  return results;
 }
