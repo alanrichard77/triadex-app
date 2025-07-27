@@ -9,7 +9,7 @@ export interface StockInfo {
 
 export async function fetchB3Stocks(): Promise<StockInfo[]> {
   try {
-    // Faz uma busca avançada por todas as ações ativas na B3 via StatusInvest
+    // Busca todas as ações ativas da B3 usando a API da StatusInvest
     const { data } = await axios.post(
       "https://statusinvest.com.br/acao/busca-avancada",
       {
@@ -22,6 +22,7 @@ export async function fetchB3Stocks(): Promise<StockInfo[]> {
       },
       { headers: { "Content-Type": "application/json" } }
     );
+    // Se precisar ajustar os campos, veja pelo console.log(data)
     return data.map((item: any) => ({
       symbol: item.ticker,
       name: item.empresa,
