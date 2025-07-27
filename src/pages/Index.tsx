@@ -1,8 +1,9 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App";
 
-import ScannerTable from '@/components/ScannerTable';
-
-const Index = () => {
-  return <ScannerTable />;
-};
-
-export default Index;
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
