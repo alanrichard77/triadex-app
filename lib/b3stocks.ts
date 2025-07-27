@@ -1,24 +1,34 @@
+// lib/b3stocks.ts
+import axios from 'axios';
 
-// Lista das 50 ações mais líquidas da B3 (atualizada 2025)
-export const B3_STOCKS = [
-  // Blue Chips - Maior liquidez
-  "PETR4", "VALE3", "ITUB4", "BBDC4", "ABEV3", "BBAS3", "WEGE3", "SUZB3", "RENT3", "LREN3",
-  "MGLU3", "VBBR3", "ITSA4", "PETR3", "BBDC3", "RAIL3", "USIM5", "CSNA3", "GOAU4", "BEEF3",
-  "JBSS3", "BRFS3", "MRFG3", "CCRO3", "CIEL3", "HYPE3", "RADL3", "RAIA3", "PCAR3", "ASAI3",
-  
-  // Setor Financeiro
-  "SANB11", "BPAC11", "PINE4", "BMGB4", "BAZA3", "BPAN4", "CARD3", "CSAN3", "WIZS3", "BANC3",
-  
-  // Outros setores importantes
-  "BRAV3", "PRIO3", "RECR3", "GGBR4", "USIM3", "KLBN11", "EGIE3", "CMIG4", "CPFE3", "ELET3"
-];
+export interface StockInfo {
+  symbol: string;
+  name: string;
+  type: string;
+  volume: number;
+}
 
-export const getStockBatch = (startIndex: number, batchSize: number = 50): string[] => {
-  return B3_STOCKS.slice(startIndex, startIndex + batchSize);
-};
-
-export const getTotalStocks = (): number => B3_STOCKS.length;
-
-export const isValidStock = (ticker: string): boolean => {
-  return B3_STOCKS.includes(ticker.toUpperCase());
-};
+export async function fetchB3Stocks(): Promise<StockInfo[]> {
+  // Exemplo usando CSV público da B3 com ativos negociados
+  // (você pode trocar para scraping se preferir fonte HTML)
+  const url = "https://sistemaswebb3-listados.b3.com.br/listedCompaniesPage/main/negociacoes.csv";
+  try {
+    const { data } = await axios.get(url);
+    const rows = data.split('\n').slice(1); // remove header
+    const stocks = rows
+      .map((line: string) => {
+        const [symbol, name, type] = line.split(';');
+        return {
+          symbol: symbol?.trim(),
+          name: name?.trim(),
+          type: type?.trim(),
+          volume: 0 // Placeholder, será preenchido depois
+        };
+      })
+      .filter(stock => stock.symbol && stock.symbol.endsWith('3') || stock.symbol.endsWith('4'));
+    return stocks;
+  } catch (err) {
+    console.error("Erro ao buscar tickers B3:", err);
+    return [];
+  }
+}
